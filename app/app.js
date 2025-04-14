@@ -19,7 +19,7 @@ app.use(express.json());
 
 // ACCOUNT endpoints
 
-app.get("/accounts", (req, res) => {
+app.get("/accounts", (res) => {
   res.json(getAccounts());
 });
 
@@ -38,15 +38,43 @@ app.put("/accounts/:id/balance", (req, res) => {
 
 // RATE endpoints
 
-app.get("/rates", (req, res) => {
+app.get("/rates", (res) => {
   res.json(getRates());
 });
 
 app.put("/rates", (req, res) => {
   const { baseCurrency, counterCurrency, rate } = req.body;
 
-  if (!baseCurrency || !counterCurrency || !rate) {
-    return res.status(400).json({ error: "Malformed request" });
+  if (baseCurrency === undefined) {
+    return res.status(400).json({ error: "Missing field: baseCurrency" });
+  }
+
+  if (counterCurrency === undefined) {
+    return res.status(400).json({ error: "Missing field: counterCurrency" });
+  }
+
+  if (rate === undefined) {
+    return res.status(400).json({ error: "Missing field: rate" });
+  }
+
+  if (typeof baseCurrency !== "string" || baseCurrency.length !== 3) {
+    return res.status(400).json({
+      error: "Invalid baseCurrency: must be a 3-character string"
+    });
+  }
+
+  // Validación de counterCurrency
+  if (typeof counterCurrency !== "string" || counterCurrency.length !== 3) {
+    return res.status(400).json({
+      error: "Invalid counterCurrency: must be a 3-character string"
+    });
+  }
+
+  // Validación de rate
+  if (typeof rate !== "number" || !Number.isInteger(rate) || rate <= 0) {
+    return res.status(400).json({
+      error: "Invalid rate: must be an integer greater than 0"
+    });
   }
 
   const newRateRequest = { ...req.body };
@@ -57,7 +85,7 @@ app.put("/rates", (req, res) => {
 
 // LOG endpoint
 
-app.get("/log", (req, res) => {
+app.get("/log", (res) => {
   res.json(getLog());
 });
 
