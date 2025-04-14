@@ -1,5 +1,7 @@
 import express from "express";
 
+import { getTiers } from "./state.js";
+
 import {
   init as exchangeInit,
   getAccounts,
@@ -20,6 +22,11 @@ app.use(express.json());
 // ACCOUNT endpoint
 app.get("/accounts", (_, res) => {
   res.json(getAccounts());
+});
+
+// TIERS endpoint
+app.get("/tiers", (_, res) => {
+  res.json(getTiers());
 });
 
 // TRANSFER endpoint

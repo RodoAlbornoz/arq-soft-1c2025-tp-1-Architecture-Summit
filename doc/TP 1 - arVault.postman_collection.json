@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Get rates",
+			"name": "Get Rates",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -73,7 +73,7 @@
 			"response": []
 		},
 		{
-			"name": "Set rate",
+			"name": "Set Rate",
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -120,7 +120,7 @@
 			"response": []
 		},
 		{
-			"name": "Post transfer",
+			"name": "Post Transfer",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -142,6 +142,25 @@
 					"port": "5555",
 					"path": [
 						"transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Tiers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/tiers",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"tiers"
 					]
 				}
 			},
