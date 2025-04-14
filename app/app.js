@@ -19,7 +19,7 @@ app.use(express.json());
 
 // ACCOUNT endpoints
 
-app.get("/accounts", (res) => {
+app.get("/accounts", (_, res) => {
   res.json(getAccounts());
 });
 
@@ -50,7 +50,7 @@ app.put("/accounts/:id/balance", (req, res) => {
 
 // RATE endpoints
 
-app.get("/rates", (res) => {
+app.get("/rates", (_, res) => {
   res.json(getRates());
 });
 
@@ -95,7 +95,7 @@ app.put("/rates", (req, res) => {
 
 // LOG endpoint
 
-app.get("/log", (res) => {
+app.get("/log", (_, res) => {
   res.json(getLog());
 });
 
