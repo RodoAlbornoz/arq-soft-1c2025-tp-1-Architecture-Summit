@@ -17,39 +17,67 @@ const port = 3000;
 
 app.use(express.json());
 
-// ACCOUNT endpoints
-
+// ACCOUNT endpoint
 app.get("/accounts", (_, res) => {
   res.json(getAccounts());
 });
 
-app.put("/accounts/:id/balance", (req, res) => {
-  const accountId = req.params.id;
-  const { balance } = req.body;
+// TRANSFER endpoint
+app.post("/transfer", (req, res) => {
+  const { fromAccountId, toAccountId, amount } = req.body;
 
-  if (accountId === undefined) {
-    return res.status(400).json({ error: "Missing parameter: accountId" });
+  if (fromAccountId === undefined) {
+    return res.status(400).json({ error: "Missing field: fromAccountId" });
   }
 
-  if (balance === undefined) {
-    return res.status(400).json({ error: "Missing field: balance" });
+  if (toAccountId === undefined) {
+    return res.status(400).json({ error: "Missing field: toAccountId" });
   }
 
-  const parsedAccountId = parseInt(accountId, 10);
-  if (isNaN(parsedAccountId) || accountId <= 0) {
-    return res.status(400).json({ error: "Invalid accountId. Must be a positive integer." });
+  if (amount === undefined) {
+    return res.status(400).json({ error: "Missing field: amount" });
   }
 
-  if (!Number.isInteger(balance) || balance <= 0) {
-    return res.status(400).json({ error: "Invalid balance. Must be a positive integer." });
+  if (!Number.isInteger(fromAccountId) || fromAccountId <= 0) {
+    return res.status(400).json({ error: "Invalid fromAccountId. Must be a positive integer." });
   }
-  
-  setAccountBalance(accountId, balance);
-  res.json(getAccounts());
+
+  if (!Number.isInteger(toAccountId) || toAccountId <= 0) {
+    return res.status(400).json({ error: "Invalid toAccountId. Must be a positive integer." });
+  }
+
+  if (typeof amount !== "number" || amount <= 0) {
+    return res.status(400).json({ error: "Invalid amount. Must be a positive number." });
+  }
+
+  const accounts = getAccounts();
+  const fromAccount = accounts.find(acc => acc.id === fromAccountId);
+  const toAccount = accounts.find(acc => acc.id === toAccountId);
+
+  if (fromAccount.currency !== toAccount.currency) {
+    return res.status(400).json({ error: "Accounts must have the same currency" });
+  }
+
+  if (!fromAccount || !toAccount) {
+    return res.status(404).json({ error: "One or both accounts not found." });
+  }
+
+  if (fromAccountId.balance < amount) {
+    return res.status(400).json({ error: "Insufficient funds in source account." });
+  }
+
+  setAccountBalance(fromAccountId, fromAccount.balance - amount);
+  setAccountBalance(toAccountId, toAccount.balance + amount);
+
+  res.status(200).json({
+    message: "Transfer completed successfully",
+    fromAccountId,
+    toAccountId,
+    amount
+  });
 });
 
 // RATE endpoints
-
 app.get("/rates", (_, res) => {
   res.json(getRates());
 });
@@ -94,7 +122,6 @@ app.put("/rates", (req, res) => {
 });
 
 // LOG endpoint
-
 app.get("/log", (_, res) => {
   res.json(getLog());
 });
