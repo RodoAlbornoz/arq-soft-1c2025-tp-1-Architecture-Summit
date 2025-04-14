@@ -63,15 +63,13 @@ app.put("/rates", (req, res) => {
     });
   }
 
-  // Validación de counterCurrency
   if (typeof counterCurrency !== "string" || counterCurrency.length !== 3) {
     return res.status(400).json({
       error: "Invalid counterCurrency: must be a 3-character string"
     });
   }
 
-  // Validación de rate
-  if (typeof rate !== "number" || !Number.isInteger(rate) || rate <= 0) {
+  if (!Number.isInteger(rate) || rate <= 0) {
     return res.status(400).json({
       error: "Invalid rate: must be an integer greater than 0"
     });
@@ -90,7 +88,6 @@ app.get("/log", (res) => {
 });
 
 // EXCHANGE endpoint
-
 app.post("/exchange", async (req, res) => {
   const {
     baseCurrency,
@@ -100,23 +97,57 @@ app.post("/exchange", async (req, res) => {
     baseAmount,
   } = req.body;
 
-  if (
-    !baseCurrency ||
-    !counterCurrency ||
-    !baseAccountId ||
-    !counterAccountId ||
-    !baseAmount
-  ) {
-    return res.status(400).json({ error: "Malformed request" });
+  if (baseCurrency === undefined) {
+    return res.status(400).json({ error: "Missing field: baseCurrency" });
+  }
+
+  if (counterCurrency === undefined) {
+    return res.status(400).json({ error: "Missing field: counterCurrency" });
+  }
+
+  if (baseAccountId === undefined) {
+    return res.status(400).json({ error: "Missing field: baseAccountId" });
+  }
+
+  if (counterAccountId === undefined) {
+    return res.status(400).json({ error: "Missing field: counterAccountId" });
+  }
+
+  if (baseAmount === undefined) {
+    return res.status(400).json({ error: "Missing field: baseAmount" });
+  }
+
+  if (typeof baseCurrency !== "string" || baseCurrency.length !== 3) {
+    return res.status(400).json({
+      error: "Invalid baseCurrency: must be a 3-character string"
+    });
+  }
+
+  if (typeof counterCurrency !== "string" || counterCurrency.length !== 3) {
+    return res.status(400).json({ 
+      error: "Invalid counterCurrency must be a 3-character string" 
+    });
+  }
+
+  if (!Number.isInteger(baseAccountId) || baseAccountId <= 0) {
+    return res.status(400).json({ error: "baseAccountId must be a positive integer" });
+  }
+
+  if (!Number.isInteger(counterAccountId) || counterAccountId <= 0) {
+    return res.status(400).json({ error: "counterAccountId must be a positive integer" });
+  }
+
+  if (typeof baseAmount !== "number" || baseAmount <= 0) {
+    return res.status(400).json({ error: "baseAmount must be a positive number" });
   }
 
   const exchangeRequest = { ...req.body };
   const exchangeResult = await exchange(exchangeRequest);
 
   if (exchangeResult.ok) {
-    res.status(200).json(exchangeResult);
+    res.status(200).json('Currency exchange completed.');
   } else {
-    res.status(500).json(exchangeResult);
+    res.status(500).json('An error occurred while processing the exchange.');
   }
 });
 
