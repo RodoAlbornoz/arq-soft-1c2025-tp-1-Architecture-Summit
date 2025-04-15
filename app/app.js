@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getTiers } from "./state.js";
+import { getAccountById } from './state.js'
 
 import {
   init as exchangeInit,
@@ -9,6 +9,7 @@ import {
   getRates,
   setRate,
   getLog,
+  getTiers,
   exchange,
 } from "./exchange.js";
 
@@ -172,9 +173,8 @@ app.post("/transfer", (req, res) => {
     return res.status(400).json({ error: fieldError });
   }
 
-  const accounts = getAccounts();
-  const fromAccount = accounts.find(acc => acc.id === fromAccountId);
-  const toAccount = accounts.find(acc => acc.id === toAccountId);
+  const fromAccount = getAccountById(fromAccountId);
+  const toAccount = getAccountById(toAccountId);
 
   const accountsAndAmountError = evaluateAccountsAndAmount(fromAccount, toAccount, amount);
   if (accountsAndAmountError) {

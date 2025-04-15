@@ -15,19 +15,29 @@ const RATES = "./state/rates.json";
 const LOG = "./state/log.json";
 const TIERS = "./state/tiers.json";
 
+function indexById(arr) {
+  return new Map(arr.map(account => [account.id, account]));
+}
+
 export async function init() {
-  accounts = await load(ACCOUNTS);
+  const accountsArray = await load(ACCOUNTS);
+  accounts = indexById(accountsArray);
+
   rates = await load(RATES);
   log = await load(LOG);
   tiers = await load(TIERS);
 
-  scheduleSave(accounts, ACCOUNTS, 1000);
+  scheduleSave(accountsArray, ACCOUNTS, 1000);
   scheduleSave(rates, RATES, 5000);
   scheduleSave(log, LOG, 1000);
 }
 
+export function getAccountById(id) {
+  return accounts.get(id);
+}
+
 export function getAccounts() {
-  return accounts;
+  return Array.from(accounts.values());
 }
 
 export function getRates() {
