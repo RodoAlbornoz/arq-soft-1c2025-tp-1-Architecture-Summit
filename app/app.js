@@ -41,6 +41,25 @@ function validatePositiveNumberFields(fields) {
   return null;
 }
 
+function evaluateFields(fromAccountId, toAccountId, amount) {
+  const missingFieldError = checkRequiredFields({ fromAccountId, toAccountId, amount });
+  if (missingFieldError) {
+    return missingFieldError;
+  }
+
+  const invalidAccountsIdError = validatePositiveIntegerFields({ fromAccountId, toAccountId });
+  if (invalidAccountsIdError) {
+    return invalidAccountsIdError;
+  }
+
+  const invalidAmountError = validatePositiveNumberFields({ amount });
+  if (invalidAmountError) {
+    return invalidAmountError;
+  }
+
+  return null;
+}
+
 function validateAccountsHaveSameCurrency(firstAccount, secondAccounts) {
   if (firstAccount.currency !== secondAccounts.currency) {
     return "Accounts must have the same currency";
@@ -55,6 +74,22 @@ function validateFundsFromAccount(fromAccount, amount) {
   }
 
   return null;
+}
+
+function evaluateAccountsAndAmount(fromAccount, toAccount, amount) {
+  if (!fromAccount || !toAccount) {
+    return "One or both accounts not found.";
+  }
+
+  const invalidAccountsIdError = validateAccountsHaveSameCurrency(fromAccount, toAccount);
+  if (invalidAccountsIdError) {
+    return "Accounts must have the same currency";
+  }
+
+  const invalidAmountError = validateFundsFromAccount(fromAccount, amount);
+  if (invalidAmountError) {
+    return "Insufficient funds in source account.";
+  }
 }
 
 await exchangeInit();
@@ -78,35 +113,18 @@ app.get("/tiers", (_, res) => {
 app.post("/transfer", (req, res) => {
   const { fromAccountId, toAccountId, amount } = req.body;
 
-  const missingFieldError = checkRequiredFields({ fromAccountId, toAccountId, amount });
-  if (missingFieldError) {
-    return res.status(400).json({ error: missingFieldError });
-  }
-
-  const invalidAccountsIdError = validatePositiveIntegerFields({ fromAccountId, toAccountId });
-  if (invalidAccountsIdError) {
-    return res.status(400).json({ error: invalidAccountsIdError });
-  }
-
-  const invalidAmountError = validatePositiveNumberFields({ amount });
-  if (invalidAmountError) {
-    return res.status(400).json({ error: invalidAmountError });
+  const fieldError = evaluateFields(fromAccountId, toAccountId, amount);
+  if (fieldError) {
+    return res.status(400).json({ error: fieldError });
   }
 
   const accounts = getAccounts();
   const fromAccount = accounts.find(acc => acc.id === fromAccountId);
   const toAccount = accounts.find(acc => acc.id === toAccountId);
 
-  if (!fromAccount || !toAccount) {
-    return res.status(404).json({ error: "One or both accounts not found." });
-  }
-
-  if (validateAccountsHaveSameCurrency(fromAccount, toAccount)) {
-    return res.status(400).json({ error: "Accounts must have the same currency" });
-  }
-
-  if (validateFundsFromAccount(fromAccount, amount)) {
-    return res.status(400).json({ error: "Insufficient funds in source account." });
+  const accountsAndAmountError = evaluateAccountsAndAmount(fromAccount, toAccount, amount);
+  if (accountsAndAmountError) {
+    return res.status(400).json({ error: accountsAndAmountError });
   }
 
   setAccountBalance(fromAccountId, fromAccount.balance - amount);
