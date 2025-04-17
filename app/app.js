@@ -10,6 +10,14 @@ import {
   exchange,
 } from "./exchange.js";
 
+import StatsD from 'hot-shots';
+
+const statsd = new StatsD({
+  host: 'graphite',
+  port: 8125,
+  prefix: 'arvault',
+});
+
 await exchangeInit();
 
 const app = express();
@@ -84,6 +92,20 @@ app.post("/exchange", async (req, res) => {
 
   const exchangeRequest = { ...req.body };
   const exchangeResult = await exchange(exchangeRequest);
+
+  const counterAmount = exchangeResult.counterAmount;
+  if (counterAmount !== undefined && counterAmount !== null) {
+    // métricas volumen por moneda
+    statsd.increment(`volumen.${baseCurrency}`, baseAmount);
+    statsd.increment(`volumen.${counterCurrency}`, counterAmount);
+  
+    // métricas neto operado por moneda
+    statsd.increment(`neto.${baseCurrency}`, baseAmount);
+    statsd.decrement(`neto.${counterCurrency}`, counterAmount);
+  } else {
+    // Loguear si no se encontró el counterAmount en un resultado exitoso
+    console.warn("Exchange successful but counterAmount not found in result for metrics.", exchangeResult);
+  }
 
   if (exchangeResult.ok) {
     res.status(200).json(exchangeResult);
