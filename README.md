@@ -46,9 +46,8 @@ versiones (Una a la vez), y se usa el archivo exchanges.csv para setear los exch
 Y dentro de Run_Scenarios están los resultados de Artillery
 
 ## Informes
-- En la carpeta informes, están los distintos informes en los que se hacen distintos análisis
-- de la arquitectura, del proyecto y demas.
-- 
+En la carpeta informes, están los distintos informes en los que se hacen distintos análisis
+de la arquitectura, del proyecto y demas.
 - Arquitectura de software - TP1: Informe principal con análisis de la arquitectura base, pruebas realizadas, tácticas empleadas y arquitectura final.
 - Resultados grafana: Se muestran los resultados de grafana al correr los distintos escenarios
 de Artillery
