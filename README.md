@@ -20,6 +20,12 @@ Para grafana creamos 2 dashboards:
 
 En grafana, se deben crear los datasource graphite-infra (Con URL http://graphite-infra:80) y graphite-business (Con URL http://graphite-business:80)
 
+### Como levantar los dashboards de grafana y visualizar las peticiones en los paneles
+1. Crear los data sources especificados arriba
+2. Importar los dashboards dashboard-business y dashboard-infra del perf/
+3. En el dashboard-business, configurar para que cada panel tome como data source el graphite-business
+4. En el dashboard-infra, configurar para que cada panel tome como data source el graphite-infra, excepto el panel de server-side, que debe tomar como data source el graphite-business
+
 ## Puertos 
 Asi quedaron los puertos para el TP:
 - Grafana => 8100
